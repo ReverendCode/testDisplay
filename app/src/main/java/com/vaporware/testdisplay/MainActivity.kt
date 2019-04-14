@@ -2,25 +2,24 @@ package com.vaporware.testdisplay
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
-import org.eclipse.paho.android.service.MqttAndroidClient
-import org.eclipse.paho.client.mqttv3.*
-import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity() {
 
-    private var connection: Connection? = null
+    private var mqttBrokerConnection: MqttBrokerConnection? = null
     override fun onCreate(savedInstanceState: Bundle?) {
-        connection = Connection(this, mapOf(
-            "topic" to { message: String? ->
-                text_example.text = message ?: "Null"
+        mqttBrokerConnection = MqttBrokerConnection(this, mapOf(
+
+            "+/foo" to { topic, message ->
+                Toast.makeText(this, "Any temp: $topic", Toast.LENGTH_SHORT).show()
+                cargo_temp_text.text = "$message F"
             },
-            "toast" to { message ->
-                Toast.makeText(this, message!!, Toast.LENGTH_SHORT).show()
+            "foo/+" to { topic, message ->
+                cargo_temp_text.text = message
+                Toast.makeText(this, "the Topic: $topic", Toast.LENGTH_SHORT).show()
             }
         ))
         super.onCreate(savedInstanceState)
@@ -28,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun handleClick(view: View) {
-        connection?.publishMessage("topic","FabPayload")
+        mqttBrokerConnection?.publishMessage("foo/temp","aNumber")
     }
 
 }
